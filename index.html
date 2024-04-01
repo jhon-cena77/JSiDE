@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS IDE</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.27.0/min/vs/loader.js"></script>
+</head>
+<body>
+    <h1>JavaScript IDE</h1>
+
+    <div class="popup" id="popup"></div>
+
+    <!-- Input area for user's JavaScript code -->
+    <div id="codeInput"></div><br>
+
+    <!-- Button to run the code -->
+    <button onclick="runCode()">Run Code</button>
+
+    <button onclick="clearConsole()">Clear Console</button>
+
+    <button onclick="settings()">Settings</button>
+
+    <!-- Display area for console output -->
+    <div id="consoleOutput" class="console"><br></div>
+
+    <script>
+        function clearConsole() {
+            // Clear the console output
+            document.getElementById("consoleOutput").innerHTML = "Console Output:<br>";
+        }
+        var editor; // Declare the editor variable in the global scope
+
+        // Wait for the loader script to be loaded
+        require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.30.0/min/vs' } });
+        
+        function initEditor() {
+
+            require(['vs/editor/editor.main'], function () {
+                // Initialize the editor
+                editor = monaco.editor.create(document.getElementById('codeInput'), {
+                    value: 'console.log("Hello, World!"); //example code', // Initial code in the editor
+                    language: 'javascript', // Set the initial language mode
+                    base: 'vs-dark', // Set the theme (you can change it to 'vs' for light theme)
+                    theme: 'vs-dark',
+                    inherit: false,
+                    automaticLayout: true, // Adjust the layout automatically
+                    lineNumbers: true, // Show line numbers
+                    minimap: {
+                        enabled: false // Disable 
+                    }
+                    //vscode dark theme at dark.js had to be removed cuz it put out light theme
+
+                });
+            });
+        }
+
+        require(['vs/editor/editor.main'], initEditor);
+
+        function runCode() {
+            try {
+                // Capture the user's code
+                var userCode = editor.getValue();
+
+                // Execute the user's code and capture console output
+                var consoleOutput = captureConsoleOutput(userCode);
+
+                // Display console output in HTML
+                document.getElementById("consoleOutput").innerHTML = "Console Output: " + consoleOutput + "<br>";
+            } catch (error) {
+                // Display any errors that occur during code execution
+                document.getElementById("consoleOutput").innerHTML = "Error: " + error.message + "<br>";
+            }
+        }
+        function captureConsoleOutput(code) {
+            // Save the original console methods
+            var originalConsoleLog = console.log;
+            var originalConsoleError = console.error;
+            var originalConsoleWarn = console.warn;
+
+            // Create an array to capture console output
+            var capturedConsoleOutput = [];
+
+            // Override console.log to capture output
+            console.log = function (message) {
+                capturedConsoleOutput.push(message  + "<br>");
+                originalConsoleLog.apply(console, arguments);
+            };
+
+            // Override console.error to capture errors
+            console.error = function (message) {
+                capturedConsoleOutput.push("Error: " + message  + "<br>");
+                originalConsoleError.apply(console, arguments);
+            };
+
+            console.warn = function (message) {
+                capturedConsoleOutput.push("Warning: " + message + "<br>");
+                originalConsoleWarn.apply(console, arguments);
+            };
+
+            try {
+                // Execute the user's code
+                eval(code);
+            } finally {
+                // Restore original console methods
+                console.log = originalConsoleLog;
+                console.error = originalConsoleError;
+                console.warn = originalConsoleWarn;
+            }
+
+            // Return the captured console output
+            return capturedConsoleOutput.join('\n');
+        }
+    </script>
+    <script>
+    //implement themes later on
+    var theme = document.getElementById("theme");
+    </script>
+</body>
+</html>
