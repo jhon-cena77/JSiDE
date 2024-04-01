@@ -19,9 +19,9 @@ button {
     background-color: rgb(48, 48, 48);
     color: rgb(0, 255, 0);
 }
-
+/* Experimental code--UNTESTED */
 #codeInput {
-    height: 300px;
-    width: 400px;
+    width: 100vw; /* Set width to 100% of the viewport width */
+    height: 100vh; /* Set height to 100% of the viewport height */
 }
 
